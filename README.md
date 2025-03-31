@@ -1,7 +1,19 @@
 # FarmFlow_Project
 # Intelligent Agricultural Systems: Applied Machine Learning Solutions
 
-![AgTech AI Banner](https://example.com/path/to/banner-image.jpg)  
+![Image](https://github.com/user-attachments/assets/8a410494-639a-4bc1-ab8e-9d7c963b6a90)
+![Image](https://github.com/user-attachments/assets/c9cb5a68-265d-41b8-b7ef-cab80d9930e5)
+![Image](https://github.com/user-attachments/assets/b18b8ce2-be44-41c5-bf8e-2be38a219050)
+![Image](https://github.com/user-attachments/assets/72df65a5-21f6-42d0-920f-e0d61c800871) 
+![Image](https://github.com/user-attachments/assets/6d78f640-5f71-4dc1-81fd-8136aed1debe)
+![Image](https://github.com/user-attachments/assets/724d7e5b-83a8-4a0b-bd2c-ceeeb0723879)
+![Image](https://github.com/user-attachments/assets/f62d4455-0bdd-409f-91cb-a2497395a4ff)
+![Image](https://github.com/user-attachments/assets/54cf395c-8945-4903-857b-0357b6ef941f)
+![Image](https://github.com/user-attachments/assets/ff39c0b8-5884-4245-9620-26a30be92586)
+
+
+
+
 
 A suite of machine learning models designed to address critical challenges in modern agriculture through data-driven decision-making. This project demonstrates the practical application of AI/ML in precision agriculture, from crop recommendation to disease detection and market forecasting.
 
