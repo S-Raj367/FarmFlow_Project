@@ -50,7 +50,7 @@ export default function PricePrediction() {
 
     try {
       // Send only the 3 required features (Month, Year, Rainfall)
-      const response = await fetch("http://localhost:5000/api/predict-price", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_ML_SERVER_URL}/api/predict-price`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
