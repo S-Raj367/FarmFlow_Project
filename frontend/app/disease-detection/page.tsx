@@ -79,7 +79,7 @@ export default function DiseaseDetection() {
 
     try {
       // Send the image to the Flask backend
-      const response = await fetch("http://localhost:5000/api/predict-disease", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_ML_SERVER_URL}/api/predict-disease`, {
         method: "POST",
         body: formData,
       })
