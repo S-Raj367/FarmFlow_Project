@@ -5,7 +5,7 @@ numpy
 opencv-python-headless
 scikit-learn
 joblib
-tensorflow-cpu
+tensorflow==2.19.0
 groq
 openai
 requests
