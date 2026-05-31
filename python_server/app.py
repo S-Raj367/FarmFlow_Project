@@ -6,15 +6,14 @@ import pickle
 import numpy as np
 import warnings
 import cv2
-import tensorflow as tf
-from tensorflow import keras
+
+
 from tensorflow.keras.models import load_model
 from flask_cors import CORS
-from transformers import AutoModelForCausalLM, AutoTokenizer
-import torch
+
 import requests
 from openai import OpenAI  # Import OpenAI SDK
-from transformers import pipeline
+
 import traceback
 import threading
 from huggingface_hub import InferenceClient
@@ -41,11 +40,61 @@ os.makedirs(app.config['upload_folder'], exist_ok=True)
 os.makedirs(app.config['height_folder'], exist_ok=True)
 
 # Replaced .pkl with .joblib for model and scaler loading
-model = pickle.load(open("trained_models/crop_recommendation_svm.pkl", "rb"))
-scaler = pickle.load(open("trained_models/crop_recommendation_scaler.pkl", "rb"))
+_crop_model=None
+_crop_scaler=None
+_disease_model=None
 
-# Replaced .h5 with .pb for model loading
-disease_model = load_model('trained_models/plant_disease_model.h5')
+def get_crop_models():
+
+    global _crop_model,_crop_scaler
+
+    if _crop_model is None:
+
+        print("Loading crop models...")
+
+        _crop_model=pickle.load(
+
+            open(
+
+                "trained_models/crop_recommendation_svm.pkl",
+
+                "rb"
+
+            )
+
+        )
+
+        _crop_scaler=pickle.load(
+
+            open(
+
+                "trained_models/crop_recommendation_scaler.pkl",
+
+                "rb"
+
+            )
+
+        )
+
+    return _crop_model,_crop_scaler
+
+
+def get_disease_model():
+
+    global _disease_model
+
+    if _disease_model is None:
+
+        print("Loading disease model...")
+
+        _disease_model=load_model(
+
+            "trained_models/plant_disease_model.h5"
+
+        )
+
+    return _disease_model
+
 
 plant_list = ['apple', 'banana', 'blackgram', 'chickpea', 'coconut', 'coffee',
        'cotton', 'grapes', 'jute', 'kidneybeans', 'lentil', 'maize', 'mango',
@@ -96,40 +145,103 @@ def allowed_files(filename):
  API endpoint for recommending the crop based on 7 features
  model used is Support Vector Machine with RBF kernel
 '''
-@app.route('/api/predict-crop', methods=['POST'])
+@app.route('/api/predict-crop',methods=['POST'])
+
 def recommend_crop():
+
     try:
-        data = request.get_json()
+
+        model,scaler=get_crop_models()
+
+        data=request.get_json()
+
         if not data:
-            return jsonify({"error": "No data provided"}), 400
-            
-        print("Received data:", data)
-        
-        # Extract the required parameters
-        required_fields = ['N', 'P', 'K', 'temperature', 'humidity', 'ph', 'rainfall']
-        input_values = []
-        
+
+            return jsonify({
+
+                "error":"No data provided"
+
+            }),400
+
+        required_fields=[
+
+            'N',
+
+            'P',
+
+            'K',
+
+            'temperature',
+
+            'humidity',
+
+            'ph',
+
+            'rainfall'
+
+        ]
+
+        input_values=[]
+
         for field in required_fields:
+
             if field not in data:
-                return jsonify({"error": f"Missing required field: {field}"}), 400
-            input_values.append(data[field])
-        
-        X = np.array(input_values).reshape(1, -1)
-        print("Input shape:", X.shape)
-        
-        X_scaled = scaler.transform(X)
-        predictions = model.predict(X_scaled).tolist()
-        prediction_index = predictions[0]
-        
-        if isinstance(prediction_index, (int, np.integer)) and 0 <= prediction_index < len(plant_list):
-            plant_pred = plant_list[prediction_index]
-            return jsonify({"crop": plant_pred})
-        else:
-            return jsonify({"error": f"Invalid prediction index: {prediction_index}"}), 500
-            
+
+                return jsonify({
+
+                    "error":f"Missing required field: {field}"
+
+                }),400
+
+            input_values.append(
+
+                data[field]
+
+            )
+
+        X=np.array(
+
+            input_values
+
+        ).reshape(
+
+            1,
+
+            -1
+
+        )
+
+        X_scaled=scaler.transform(X)
+
+        predictions=model.predict(
+
+            X_scaled
+
+        ).tolist()
+
+        idx=predictions[0]
+
+        if 0<=idx<len(plant_list):
+
+            return jsonify({
+
+                "crop":plant_list[idx]
+
+            })
+
+        return jsonify({
+
+            "error":"Invalid prediction"
+
+        }),500
+
     except Exception as e:
-        print(f"Error: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+
+        return jsonify({
+
+            "error":str(e)
+
+        }),500
 
 # Add a simple test endpoint to verify the server is running
 @app.route('/test', methods=['GET'])
@@ -174,7 +286,9 @@ def predict_disease():
             print("Input shape:", x.shape)
            
             # Use the Keras model for prediction
-            predictions = disease_model.predict(x)
+            disease_model=get_disease_model()
+
+            predictions=disease_model.predict(x)
             print("Model predictions:", predictions)
            
             y = np.argmax(predictions, axis=1)[0]
@@ -419,11 +533,25 @@ def chatbot():
 
 if __name__=="__main__":
 
-    import os
+    port=int(
 
-    print("STARTING FLASK SERVER...")
+        os.environ.get(
 
-    port=int(os.environ.get("PORT",5000))
+            "PORT",
+
+            5000
+
+        )
+
+    )
+
+    print(
+
+        "Starting server on port:",
+
+        port
+
+    )
 
     app.run(
 
@@ -431,6 +559,8 @@ if __name__=="__main__":
 
         port=port,
 
-        debug=False
+        debug=False,
+
+        threaded=True
 
     )
