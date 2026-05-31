@@ -55,7 +55,7 @@ const CropRecommendation: React.FC = () => {
     
     try {
       // Updated URL to the Flask backend on port 5000 with new endpoint
-      const response = await fetch('http://localhost:5000/api/predict-crop', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_ML_SERVER_URL}/api/predict-crop`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
