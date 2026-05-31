@@ -322,33 +322,115 @@ def price():
 
 #     return jsonify({"response": response})
 
+load_dotenv()
 
-# Initialize Groq client (temporary hardcoded key)
-groq_client = Groq(api_key="API_KEY")  # Replace with your key
+key=os.getenv("GROQ_API_KEY")
 
-@app.route('/api/farm-chatbot', methods=['POST'])
+if not key:
+
+    raise Exception("GROQ_API_KEY not found")
+
+print("KEY LOADED:",key[:10])
+
+groq_client=Groq(
+    api_key=key
+)
+
+@app.route('/api/farm-chatbot',methods=['POST'])
+
 def chatbot():
-    try:
-        data = request.get_json()
-        if not data or "message" not in data:
-            return jsonify({"error": "Missing 'message' field"}), 400
 
-        # Call Groq API
-        chat_completion = groq_client.chat.completions.create(
+    try:
+
+        data=request.get_json()
+
+        print("REQUEST:",data)
+
+        if not data:
+
+            return jsonify({
+
+                "error":"No JSON received"
+
+            }),400
+
+        message=data.get("message")
+
+        if not message:
+
+            return jsonify({
+
+                "error":"Missing message"
+
+            }),400
+
+        chat_completion=groq_client.chat.completions.create(
+
             messages=[
-                {"role": "system", "content": "You are an agricultural expert."},
-                {"role": "user", "content": data["message"]}
+
+                {
+
+                    "role":"system",
+
+                    "content":"You are an agricultural expert."
+
+                },
+
+                {
+
+                    "role":"user",
+
+                    "content":message
+
+                }
+
             ],
-            model="llama3-70b-8192",
+
+            model="llama-3.3-70b-versatile",
+
             temperature=0.7,
+
             max_tokens=150
+
         )
 
-        return jsonify({"response": chat_completion.choices[0].message.content})
+        response=chat_completion.choices[0].message.content
+
+        return jsonify({
+
+            "response":response
+
+        })
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    
 
-if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+        print("\n===== CHATBOT ERROR =====")
+
+        traceback.print_exc()
+
+        print("=========================\n")
+
+        return jsonify({
+
+            "error":str(e)
+
+        }),500
+
+
+if __name__=="__main__":
+
+    import os
+
+    print("STARTING FLASK SERVER...")
+
+    port=int(os.environ.get("PORT",5000))
+
+    app.run(
+
+        host="0.0.0.0",
+
+        port=port,
+
+        debug=False
+
+    )
