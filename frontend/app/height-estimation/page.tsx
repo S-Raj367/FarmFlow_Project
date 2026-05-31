@@ -74,7 +74,7 @@ export default function HeightEstimation() {
       formData.append("file", file);
 
       try {
-        const response = await fetch("http://localhost:5000/api/predict-height", {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_ML_SERVER_URL}/api/predict-height', {
           method: "POST",
           body: formData,
         });
